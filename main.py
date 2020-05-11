@@ -1,15 +1,15 @@
 from fastapi import FastAPI
-from tortoise import Tortoise, run_async
 from tortoise.contrib.fastapi import register_tortoise
 
 from configs.db import db_config
-from routers import items
+from routers import routers
 
 
 app = FastAPI()
 
 # routersを登録
-app.include_router(items.router)
+for router in routers:
+    app.include_router(router)
 
 # DB
 register_tortoise(
