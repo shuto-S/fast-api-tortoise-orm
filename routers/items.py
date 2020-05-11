@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from starlette.status import HTTP_204_NO_CONTENT
 
-from models import Item_Pydantic, ItemIn_Pydantic, Items
+from models.items import Item_Pydantic, ItemIn_Pydantic, Items
 
 
 router = APIRouter()
