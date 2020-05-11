@@ -1,37 +1,29 @@
-from fastapi import APIRouter, Depends, HTTPException
 from typing import List
-from databases import Database
+from fastapi import APIRouter, HTTPException
+from tortoise.contrib.fastapi import HTTPNotFoundError
 from starlette.status import HTTP_204_NO_CONTENT
 
-from utils import get_db_connection
-from schemas import items
-from models.item import ItemModel
+from models import Item_Pydantic, ItemIn_Pydantic, Items
 
 
 router = APIRouter()
 
-@router.get("/items", tags=["items"], response_model=List[ItemModel])
-async def list_item(database: Database = Depends(get_db_connection)):
-    query = items.select()
-    return await database.fetch_all(query)
+@router.get("/items", tags=["items"], response_model=List[Item_Pydantic])
+async def list_items():
+    return await Item_Pydantic.from_queryset(Items.all())
 
-@router.post("/items", tags=["items"], response_model=ItemModel)
-async def create_item(data: ItemModel, database: Database = Depends(get_db_connection)):
-    query = items.insert()
-    await database.execute(query, data.dict())
-    return {**data.dict()}
+@router.post("/items", tags=["items"], response_model=Item_Pydantic)
+async def create_item(item: ItemIn_Pydantic):
+    item_obj = await Items.create(**item.dict(exclude_unset=True))
+    return await Item_Pydantic.from_tortoise_orm(item_obj)
 
-@router.patch("/items/{item_id}", tags=["items"], response_model=ItemModel)
-async def update_item(item_id: int, data: ItemModel, database: Database = Depends(get_db_connection)):
-    query = items.update().where(items.columns.id==item_id)
-    ret = await database.execute(query, data.dict())
-    if not ret:
-        raise HTTPException(status_code=404, detail="Not Found")
-    return {**data.dict()}
+@router.patch("/items/{item_id}", tags=["items"], response_model=Item_Pydantic, responses={404: {"model": HTTPNotFoundError}})
+async def update_item(item_id: int, item: ItemIn_Pydantic):
+    await Items.filter(id=item_id).update(**item.dict(exclude_unset=True))
+    return await Item_Pydantic.from_queryset_single(Items.get(id=item_id))
 
 @router.delete("/items/{item_id}", tags=["items"], status_code=HTTP_204_NO_CONTENT)
-async def delete_item(item_id: int, database: Database = Depends(get_db_connection)):
-    query = items.delete().where(items.columns.id==item_id)
-    ret = await database.execute(query)
-    if not ret:
-        raise HTTPException(status_code=404, detail="Not Found")
+async def delete_item(item_id: int):
+    deleted_count = await Items.filter(id=item_id).delete()
+    if not deleted_count:
+        raise HTTPException(status_code=404, detail=f"Not found")

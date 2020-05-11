@@ -8,13 +8,10 @@ verify_ssl = true
 [packages]
 fastapi = "*"
 uvicorn = "*"
-databases = "*"
-sqlalchemy = "*"
-aiosqlite = "*"
+tortoise-orm = "*"
 
 [requires]
 python_version = "3.7"
 
 [scripts]
 dev = "uvicorn main:app --reload"
-migrate = "python schemas.py"
