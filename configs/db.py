@@ -10,8 +10,8 @@ db_config = {
         #         "database": "test",
         #     }
         # },
-        # "develop": "sqlite:///./db.sqlite3"
-        "develop": "sqlite://:memory:"
+        "develop": "sqlite://db.sqlite3"
+        # "develop": "sqlite://:memory:"
     },
     "apps": {
         "models": {
