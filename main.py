@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 
-from configs.db import db_config
+from configs.db import DB_CONFIG
 from routers import routers
 
 
@@ -14,7 +14,7 @@ for router in routers:
 # DB
 register_tortoise(
     app,
-    config=db_config,
+    config=DB_CONFIG,
     generate_schemas=True,
     add_exception_handlers=True,
 )

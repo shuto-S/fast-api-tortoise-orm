@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import jwt
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
@@ -31,4 +31,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         print(payload)
         return await Users.get_or_none(email=payload.get("sub"))
     except jwt.PyJWTError as e:
-        raise e
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

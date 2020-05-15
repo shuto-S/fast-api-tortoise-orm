@@ -1,4 +1,4 @@
-db_config = {
+DB_CONFIG = {
     "connections": {
         # "default": {
         #     "engine": "tortoise.backends.asyncpg",
