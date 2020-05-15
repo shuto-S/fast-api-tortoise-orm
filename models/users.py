@@ -1,8 +1,7 @@
 from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
-from pydantic import BaseModel
 
-from services.auth import get_password_hash
+from services import auth
 
 
 class Users(models.Model):
@@ -17,28 +16,31 @@ class Users(models.Model):
 
     @classmethod
     def create(cls, **kwargs):
-        kwargs["hashed_password"] = get_password_hash(kwargs["password"])
+        kwargs["hashed_password"] = auth.get_password_hash(kwargs["password"])
         return super().create(**kwargs)
 
+    @classmethod
+    async def login(cls, email: str, password: str):
+        user = await cls.get_or_none(email=email)
+        if not user:
+            return False
+        if not auth.verify_password(password, user.hashed_password):
+            return False
+        return user
+
+    def get_access_token(self):
+        if self.access_token:
+            return self.access_token
+        access_token = auth.create_access_token(data={
+            "sub": self.email,
+            "username": self.username
+        })
+        self.access_token = access_token
+        self.save()
+        return access_token
 
 User_Pydantic = pydantic_model_creator(Users, name="User", exclude=[
     "hashed_password",
     "access_token",
     "deleted_at"
 ])
-
-
-class UserIn(BaseModel):
-    username: str
-    email: str
-    password: str
-
-
-class LoginIn(BaseModel):
-    email: str
-    password: str
-
-
-class LoginOut(BaseModel):
-    access_token: str
-    token_type: str

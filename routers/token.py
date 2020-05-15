@@ -1,23 +1,30 @@
 from fastapi import APIRouter, HTTPException, status
+from pydantic import BaseModel
 
-from models.users import Users, LoginIn, LoginOut
-from services.auth import authenticate_user, create_access_token
+from models.users import Users
+from services.auth import create_access_token
 
 tags=["token"]
-
 router = APIRouter()
 
+
+class LoginIn(BaseModel):
+    email: str
+    password: str
+
+
+class LoginOut(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
 @router.post("/token", tags=tags, response_model=LoginOut)
-async def login_for_access_token(form_data: LoginIn):
-    user = await authenticate_user(Users, form_data.email, form_data.password)
+async def login_with_password(form_data: LoginIn):
+    user = await Users.login(form_data.email, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    if not user.access_token:
-        access_token = create_access_token(data={"sub": user.username})
-        user.access_token = access_token
-        await user.save()
-    return {"access_token": user.access_token, "token_type": "bearer"}
+    return LoginOut(access_token=user.get_access_token())
