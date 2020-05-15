@@ -1,26 +1,20 @@
 from fastapi import FastAPI
-from db import database
-from starlette.requests import Request
-from routers import items
+from tortoise.contrib.fastapi import register_tortoise
+
+from configs.db import db_config
+from routers import routers
+
 
 app = FastAPI()
 
-@app.on_event("startup")
-async def startup():
-    # DBコネクション開始
-    await database.connect()
-
-@app.on_event("shutdown")
-async def shutdown():
-    # DBコネクション切断
-    await database.disconnect()
-
 # routersを登録
-app.include_router(items.router)
+for router in routers:
+    app.include_router(router)
 
-# ミドルウェアでDBコネクション埋め込んでおく（routerで取得できるように）
-@app.middleware("http")
-async def db_session_middleware(request: Request, call_next):
-    request.state.connection = database
-    response = await call_next(request)
-    return response
+# DB
+register_tortoise(
+    app,
+    config=db_config,
+    generate_schemas=True,
+    add_exception_handlers=True,
+)
