@@ -4,9 +4,11 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
+from tortoise.exceptions import DoesNotExist
 
 from configs.auth import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from models.users import Users
+from services.response import HTTP_401_AUTHENTICATE_EXCEPTION
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,13 +31,16 @@ def create_access_token(*, data: dict) -> str:
     return encoded_jwt.decode()
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def login_with_password(email: str, password: str) -> Users:
+    user = await Users.get_or_none(email=email)
+    if not user or not verify_password(password, user.hashed_password):
+        raise HTTP_401_AUTHENTICATE_EXCEPTION
+    return user
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> Users:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return await Users.get_or_none(email=payload.get("sub"))
-    except jwt.PyJWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        return await Users.get(email=payload.get("sub"))
+    except (jwt.PyJWTError, DoesNotExist):
+        raise HTTP_401_AUTHENTICATE_EXCEPTION

@@ -19,15 +19,6 @@ class Users(models.Model):
         kwargs["hashed_password"] = auth.get_password_hash(kwargs["password"])
         return super().create(**kwargs)
 
-    @classmethod
-    async def login(cls, email: str, password: str):
-        user = await cls.get_or_none(email=email)
-        if not user:
-            return False
-        if not auth.verify_password(password, user.hashed_password):
-            return False
-        return user
-
     def get_access_token(self):
         if self.access_token:
             return self.access_token
