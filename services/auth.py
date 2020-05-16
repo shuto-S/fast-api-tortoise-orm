@@ -24,7 +24,7 @@ def get_password_hash(password: str) -> str:
 
 
 def create_access_token(*, data: dict) -> str:
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode = data.copy()
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -32,7 +32,7 @@ def create_access_token(*, data: dict) -> str:
 
 
 async def login_with_password(email: str, password: str) -> Users:
-    user = await Users.get_or_none(email=email)
+    user = await Users.get_active_user(email=email)
     if not user or not verify_password(password, user.hashed_password):
         raise HTTP_401_AUTHENTICATE_EXCEPTION
     return user
@@ -41,6 +41,9 @@ async def login_with_password(email: str, password: str) -> Users:
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> Users:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return await Users.get(email=payload.get("sub"))
-    except (jwt.PyJWTError, DoesNotExist):
+        user = await Users.get_active_user(email=payload.get("sub"))
+    except jwt.PyJWTError:
         raise HTTP_401_AUTHENTICATE_EXCEPTION
+    if not user:
+        raise HTTP_401_AUTHENTICATE_EXCEPTION
+    return user

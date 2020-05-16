@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from starlette.status import HTTP_204_NO_CONTENT
 
 from services.auth import get_current_user
-from models.users import Users, User_Pydantic
+from models.users import Users, User_Pydantic, UserIn_Pydantic
 
 
 tags = ["users"]
@@ -17,10 +18,20 @@ class UserIn(BaseModel):
 
 @router.post("/register", tags=tags, response_model=User_Pydantic)
 async def register_user(form_data: UserIn):
-    user = await Users.create(**form_data.dict(exclude_unset=True))
-    return await User_Pydantic.from_tortoise_orm(user)
+    return await Users.create(**form_data.dict(exclude_unset=True))
 
 
 @router.get("/me", tags=tags, response_model=User_Pydantic)
 async def get_user_data(user: Users = Depends(get_current_user)):
-    return await User_Pydantic.from_tortoise_orm(user)
+    return user
+
+
+@router.patch("/me", tags=tags, response_model=User_Pydantic)
+async def update_user(form_data: UserIn_Pydantic, user: Users = Depends(get_current_user)):
+    await user.update_from_dict(form_data.dict(exclude_unset=True)).save()
+    return user
+
+
+@router.delete("/me", tags=tags, status_code=HTTP_204_NO_CONTENT)
+async def delete_user(user: Users = Depends(get_current_user)):
+    await user.delete()
