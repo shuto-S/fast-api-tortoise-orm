@@ -39,6 +39,7 @@ class Users(models.Model):
         self.save()
         return access_token
 
+
 User_Pydantic = pydantic_model_creator(Users, name="User", exclude=[
     "hashed_password",
     "access_token",

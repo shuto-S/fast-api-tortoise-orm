@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from services.response import HTTP_404_NOT_FOUND
 from services.auth import get_current_user
 from models.users import Users, User_Pydantic
 
 
-tags=["users"]
+tags = ["users"]
 router = APIRouter()
 
 
@@ -21,6 +20,7 @@ async def register_user(form_data: UserIn):
     user = await Users.create(**form_data.dict(exclude_unset=True))
     return await User_Pydantic.from_tortoise_orm(user)
 
+
 @router.get("/me", tags=tags, response_model=User_Pydantic)
-async def get_user_data(user: dict = Depends(get_current_user)):
+async def get_user_data(user: Users = Depends(get_current_user)):
     return await User_Pydantic.from_tortoise_orm(user)
