@@ -34,4 +34,4 @@ async def update_user(form_data: UserIn_Pydantic, user: Users = Depends(get_curr
 
 @router.delete("/me", tags=tags, status_code=HTTP_204_NO_CONTENT)
 async def delete_user(user: Users = Depends(get_current_user)):
-    await user.delete()
+    await user.soft_delete()

@@ -1,20 +1,15 @@
-from datetime import datetime
-
 from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
 
+from .base import BaseModel
 from services import auth
 
 
-class Users(models.Model):
-    id = fields.IntField(pk=True)
+class Users(BaseModel):
     email = fields.CharField(max_length=100, unique=True)
     hashed_password = fields.CharField(max_length=200, null=True)
     access_token = fields.CharField(max_length=255, null=True, unique=True)
     username = fields.CharField(max_length=100, required=True)
-    created_at = fields.DatetimeField(auto_now_add=True, null=True)
-    updated_at = fields.DatetimeField(auto_now=True, null=True)
-    deleted_at = fields.DatetimeField(null=True)
 
     @classmethod
     async def get_active_user(cls, id: int = None, email: str = None):
@@ -28,10 +23,6 @@ class Users(models.Model):
     def create(cls, **kwargs):
         kwargs["hashed_password"] = auth.get_password_hash(kwargs["password"])
         return super().create(**kwargs)
-
-    async def delete(self):
-        self.deleted_at = datetime.now()
-        await self.save(update_fields=["deleted_at"])
 
     def get_access_token(self):
         if self.access_token:
