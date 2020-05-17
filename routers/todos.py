@@ -23,21 +23,21 @@ async def get_list(user: User = Depends(get_current_user)):
     return await Todo_Pydantic.from_queryset(Todo.filter(user=user))
 
 
-@router.get("/todos/{id}", tags=tags, response_model=Todo_Pydantic, responses=HTTP_404_NOT_FOUND)
-async def get_detail(id: int, user: User = Depends(get_current_user)):
-    return await Todo.get_or_none(id=id, user=user)
+@router.get("/todos/{todo_id}", tags=tags, response_model=Todo_Pydantic, responses=HTTP_404_NOT_FOUND)
+async def get_detail(todo_id: int, user: User = Depends(get_current_user)):
+    return await Todo.get_or_none(id=todo_id, user=user)
 
 
-@router.patch("/todos/{id}", tags=tags, response_model=Todo_Pydantic, responses=HTTP_404_NOT_FOUND)
-async def update(id: int, form_data: TodoIn_Pydantic, user: User = Depends(get_current_user)):
-    todo = await Todo.get_or_none(id=id, user=user)
+@router.patch("/todos/{todo_id}", tags=tags, response_model=Todo_Pydantic, responses=HTTP_404_NOT_FOUND)
+async def update(todo_id: int, form_data: TodoIn_Pydantic, user: User = Depends(get_current_user)):
+    todo = await Todo.get_or_none(id=todo_id, user=user)
     if todo:
         await todo.update_from_dict(form_data.dict(exclude_unset=True)).save()
         return await Todo_Pydantic.from_tortoise_orm(todo)
 
 
-@router.delete("/todos/{id}", tags=tags, status_code=HTTP_204_NO_CONTENT)
-async def delete(id: int, user: User = Depends(get_current_user)):
-    deleted_count = await Todo.filter(id=id, user=user).delete()
+@router.delete("/todos/{todo_id}", tags=tags, status_code=HTTP_204_NO_CONTENT)
+async def delete(todo_id: int, user: User = Depends(get_current_user)):
+    deleted_count = await Todo.filter(id=todo_id, user=user).delete()
     if not deleted_count:
         raise HTTPException(status_code=404, detail="Not found")

@@ -1,4 +1,4 @@
-from tortoise import fields, models
+from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from .base import BaseModel
@@ -36,12 +36,12 @@ class User(BaseModel):
         return access_token
 
 
-User_Pydantic = pydantic_model_creator(User, name="User", exclude=[
+User_Pydantic = pydantic_model_creator(User, name="User", exclude=(
     "hashed_password",
     "access_token",
     "deleted_at",
-])
+))
 
-UserIn_Pydantic = pydantic_model_creator(User, name="UserIn", include=[
+UserIn_Pydantic = pydantic_model_creator(User, name="UserIn", include=(
     "username",
-], exclude_readonly=True)
+), exclude_readonly=True)

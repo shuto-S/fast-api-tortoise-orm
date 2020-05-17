@@ -1,4 +1,4 @@
-from tortoise import fields, models
+from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from .base import BaseModel
@@ -12,8 +12,8 @@ class Todo(BaseModel):
     completed_at = fields.DatetimeField(null=True)
 
 
-Todo_Pydantic = pydantic_model_creator(Todo, name="Todo", exclude=["deleted_at"])
-TodoIn_Pydantic = pydantic_model_creator(Todo, name="TodoIn", include=[
+Todo_Pydantic = pydantic_model_creator(Todo, name="Todo", exclude=("deleted_at",))
+TodoIn_Pydantic = pydantic_model_creator(Todo, name="TodoIn", include=(
     "name",
     "memo",
-], exclude_readonly=True)
+), exclude_readonly=True)
