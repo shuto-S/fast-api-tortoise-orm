@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from tortoise.exceptions import DoesNotExist
 
 from configs.auth import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from models.users import Users
+from models.user import User
 from services.response import HTTP_401_AUTHENTICATE_EXCEPTION
 
 
@@ -31,17 +31,17 @@ def create_access_token(*, data: dict) -> str:
     return encoded_jwt.decode()
 
 
-async def login_with_password(email: str, password: str) -> Users:
-    user = await Users.get_active_user(email=email)
+async def login_with_password(email: str, password: str) -> User:
+    user = await User.get_active_user(email=email)
     if not user or not verify_password(password, user.hashed_password):
         raise HTTP_401_AUTHENTICATE_EXCEPTION
     return user
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> Users:
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user = await Users.get_active_user(email=payload.get("sub"))
+        user = await User.get_active_user(email=payload.get("sub"))
     except jwt.PyJWTError:
         raise HTTP_401_AUTHENTICATE_EXCEPTION
     if not user:
