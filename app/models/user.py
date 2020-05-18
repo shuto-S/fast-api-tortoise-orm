@@ -8,7 +8,6 @@ from ..services import auth
 class User(BaseModel):
     email = fields.CharField(max_length=100, unique=True)
     hashed_password = fields.CharField(max_length=200, null=True)
-    access_token = fields.CharField(max_length=255, null=True, unique=True)
     username = fields.CharField(max_length=100, required=True)
 
     @classmethod
@@ -24,21 +23,15 @@ class User(BaseModel):
         kwargs["hashed_password"] = auth.get_password_hash(kwargs["password"])
         return super().create(**kwargs)
 
-    def get_access_token(self, force_refresh=False):
-        if self.access_token and not force_refresh:
-            return self.access_token
-        access_token = auth.create_access_token(data={
+    def get_access_token(self):
+        return auth.create_access_token(data={
             "sub": self.email,
             "username": self.username
         })
-        self.access_token = access_token
-        self.save()
-        return access_token
 
 
 User_Pydantic = pydantic_model_creator(User, name="User", exclude=(
     "hashed_password",
-    "access_token",
     "deleted_at",
 ))
 

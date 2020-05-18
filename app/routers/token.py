@@ -21,4 +21,4 @@ class LoginOut(BaseModel):
 @router.post("/token", tags=tags, response_model=LoginOut)
 async def get_token_with_password(form_data: LoginIn):
     user = await login_with_password(form_data.email, form_data.password)
-    return LoginOut(access_token=user.get_access_token(force_refresh=True))
+    return LoginOut(access_token=user.get_access_token())

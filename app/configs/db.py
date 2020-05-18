@@ -1,22 +1,25 @@
+from os import environ
+
+
 DB_CONFIG = {
     "connections": {
-        # "default": {
+        # "production": {
         #     "engine": "tortoise.backends.asyncpg",
         #     "credentials": {
-        #         "host": "localhost",
-        #         "port": "5432",
-        #         "user": "tortoise",
-        #         "password": "qwerty123",
-        #         "database": "test",
+        #         "host": environ.get("DB_HOST", "localhost"),
+        #         "port": environ.get("DB_PORT", "3306"),
+        #         "user": environ.get("DB_USER", "root"),
+        #         "password": environ.get("DB_PASSWORD", "root"),
+        #         "database": environ.get("DB_DATABASE", "sample"),
         #     }
         # },
-        "develop": "sqlite://db.sqlite3"
-        # "develop": "sqlite://:memory:"
+        "development": "sqlite://db.sqlite3",
+        "test": "sqlite://:memory:"
     },
     "apps": {
         "models": {
             "models": ["app.models"],
-            "default_connection": "develop",
+            "default_connection": environ.get("ENV", "development"),
         }
     }
 }

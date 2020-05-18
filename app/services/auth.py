@@ -5,7 +5,7 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
-from app.configs.auth import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.configs.auth import AUTH_SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.models.user import User
 from app.services.response import HTTP_401_AUTHENTICATE_EXCEPTION
 
@@ -26,7 +26,7 @@ def create_access_token(*, data: dict) -> str:
     expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode = data.copy()
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, AUTH_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt.decode()
 
 
@@ -39,7 +39,7 @@ async def login_with_password(email: str, password: str) -> User:
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, AUTH_SECRET_KEY, algorithms=[ALGORITHM])
         user = await User.get_active_user(email=payload.get("sub"))
     except jwt.PyJWTError:
         raise HTTP_401_AUTHENTICATE_EXCEPTION
