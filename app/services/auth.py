@@ -1,14 +1,13 @@
 from datetime import datetime, timedelta
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-from tortoise.exceptions import DoesNotExist
 
-from configs.auth import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from models.user import User
-from services.response import HTTP_401_AUTHENTICATE_EXCEPTION
+from app.configs.auth import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.models.user import User
+from app.services.response import HTTP_401_AUTHENTICATE_EXCEPTION
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

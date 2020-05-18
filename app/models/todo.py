@@ -5,7 +5,7 @@ from .base import BaseModel
 
 
 class Todo(BaseModel):
-    user = fields.ForeignKeyField("models.Users", related_name="users")
+    user = fields.ForeignKeyField("models.User", related_name="users")
     name = fields.CharField(max_length=100)
     memo = fields.TextField(null=True)
     completed = fields.BooleanField(null=True, default=False)

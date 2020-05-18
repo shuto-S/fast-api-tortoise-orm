@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from starlette.status import HTTP_204_NO_CONTENT
 
-from services.auth import get_current_user
-from models.user import User, User_Pydantic, UserIn_Pydantic
+from app.services.auth import get_current_user
+from app.models.user import User, User_Pydantic, UserIn_Pydantic
 
 
 tags = ["users"]

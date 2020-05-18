@@ -15,7 +15,7 @@ DB_CONFIG = {
     },
     "apps": {
         "models": {
-            "models": ["models"],
+            "models": ["app.models"],
             "default_connection": "develop",
         }
     }

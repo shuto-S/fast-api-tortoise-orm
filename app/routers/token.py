@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from services.auth import login_with_password
+from app.services.auth import login_with_password
 
 
 tags = ["token"]
@@ -21,4 +21,4 @@ class LoginOut(BaseModel):
 @router.post("/token", tags=tags, response_model=LoginOut)
 async def get_token_with_password(form_data: LoginIn):
     user = await login_with_password(form_data.email, form_data.password)
-    return LoginOut(access_token=user.get_access_token())
+    return LoginOut(access_token=user.get_access_token(force_refresh=True))

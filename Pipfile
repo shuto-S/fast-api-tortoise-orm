@@ -18,4 +18,4 @@ passlib = {extras = ["bcrypt"],version = "*"}
 python_version = "3.7"
 
 [scripts]
-dev = "uvicorn main:app --reload"
+dev = "uvicorn app.main:app --reload"

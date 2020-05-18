@@ -2,10 +2,10 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from starlette.status import HTTP_204_NO_CONTENT
 
-from services.auth import get_current_user
-from services.response import HTTP_404_NOT_FOUND
-from models.todo import Todo_Pydantic, TodoIn_Pydantic, Todo
-from models.user import User
+from app.services.auth import get_current_user
+from app.services.response import HTTP_404_NOT_FOUND
+from app.models.todo import Todo_Pydantic, TodoIn_Pydantic, Todo
+from app.models.user import User
 
 
 tags = ["todos"]

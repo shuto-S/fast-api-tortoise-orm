@@ -2,7 +2,7 @@ from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from .base import BaseModel
-from services import auth
+from ..services import auth
 
 
 class User(BaseModel):
@@ -24,8 +24,8 @@ class User(BaseModel):
         kwargs["hashed_password"] = auth.get_password_hash(kwargs["password"])
         return super().create(**kwargs)
 
-    def get_access_token(self):
-        if self.access_token:
+    def get_access_token(self, force_refresh=False):
+        if self.access_token and not force_refresh:
             return self.access_token
         access_token = auth.create_access_token(data={
             "sub": self.email,
