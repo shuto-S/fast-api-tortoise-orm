@@ -1,3 +1,5 @@
+import uuid
+
 from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
 
@@ -8,6 +10,7 @@ from ..services import auth
 class User(BaseModel):
     email = fields.CharField(max_length=100, unique=True)
     hashed_password = fields.CharField(max_length=200, null=True)
+    refresh_token = fields.UUIDField(null=True)
     username = fields.CharField(max_length=100, required=True)
 
     @classmethod
@@ -21,6 +24,7 @@ class User(BaseModel):
     @classmethod
     def create(cls, **kwargs):
         kwargs["hashed_password"] = auth.get_password_hash(kwargs["password"])
+        kwargs["refresh_token"] = uuid.uuid4().hex
         return super().create(**kwargs)
 
     def get_access_token(self):
@@ -30,9 +34,9 @@ class User(BaseModel):
         })
 
 
-User_Pydantic = pydantic_model_creator(User, name="User", exclude=(
-    "hashed_password",
-    "deleted_at",
+User_Pydantic = pydantic_model_creator(User, name="User", include=(
+    "email",
+    "username",
 ))
 
 UserIn_Pydantic = pydantic_model_creator(User, name="UserIn", include=(
