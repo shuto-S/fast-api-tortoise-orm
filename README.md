@@ -1,7 +1,7 @@
 ## sample-fast-api
-- pipenv
-- FastAPI
-- Tortoise ORM
+- [pipenv](https://pipenv.pypa.io/en/latest/)
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [Tortoise-ORM](https://tortoise-orm.readthedocs.io/en/latest/)
 
 ## env
 use by copy `.evn.sample`
